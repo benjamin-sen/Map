@@ -79,8 +79,9 @@ function addGpx(path, color, name) {
 }
 
 // --- 3) Ajouter tes deux fichiers GPX ---
-// Couleur eigengrau
-const EIGENGRAU = "#16161d";
+
+// Bleu eigengrau (légèrement bleuté)
+const BLUE_EIGENGRAU = "#1b2430";
 
 // Liste de tous les GPX
 const gpxFiles = [
@@ -94,25 +95,14 @@ const gpxFiles = [
   "activity_21276471908.gpx"
 ];
 
-// Chargement de tous les GPX avec opacité 0.75
-gpxFiles.forEach(file => {
+// Chargement manuel de tous les GPX
+gpxFiles.forEach((file, index) => {
   addGpx(
     "data/" + file,
-    EIGENGRAU,
-    file.replace(".gpx", ""),
-    {
-      opacity: 0.75
-    }
+    BLUE_EIGENGRAU,
+    "Trace " + (index + 1)
   );
 });
-
-polyline_options: {
-  color: EIGENGRAU,
-  weight: 2,
-  opacity: 0.75,
-  lineCap: "round",
-  lineJoin: "round"
-}
 
 // --- 4) Contrôle des couches ---
 const baseLayers = {
