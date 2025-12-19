@@ -1,17 +1,7 @@
 // Initialiser la carte centrée sur l'Atlantique
 const map = L.map("map").setView([20, -30], 3);
 
-// --- 1) Fond GEBCO gris ---
-const gebcoGray = L.tileLayer(
-  "https://tiles.arcgis.com/tiles/C8EMgrsFcRFL6LrL/arcgis/rest/services/GEBCO_grayscale_basemap_NCEI/MapServer/tile/{z}/{y}/{x}",
-  {
-    maxZoom: 12,
-    opacity: 0.9,
-    attribution: "GEBCO & NOAA NCEI"
-  }
-).addTo(map);
-
-// Fond alternatif clair
+// Fond 1 clair
 const cartoLight = L.tileLayer(
   "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
   {
@@ -20,6 +10,16 @@ const cartoLight = L.tileLayer(
       '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; Carto'
   }
 );
+
+// --- 2) Fond GEBCO gris ---
+const gebcoGray = L.tileLayer(
+  "https://tiles.arcgis.com/tiles/C8EMgrsFcRFL6LrL/arcgis/rest/services/GEBCO_grayscale_basemap_NCEI/MapServer/tile/{z}/{y}/{x}",
+  {
+    maxZoom: 12,
+    opacity: 0.9,
+    attribution: "GEBCO & NOAA NCEI"
+  }
+).addTo(map);
 
 // --- 2) Groupe pour les traces ---
 const tracesGroup = L.layerGroup().addTo(map);
