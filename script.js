@@ -6,8 +6,6 @@ const map = L.map("map").setView([20, -30], 3);
 // ===============================
 // 2) Fonds de carte
 // ===============================
-
-// Fond principal : Carto Light
 const cartoLight = L.tileLayer(
   "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
   {
@@ -17,7 +15,6 @@ const cartoLight = L.tileLayer(
   }
 ).addTo(map);
 
-// Fond secondaire : GEBCO gris
 const gebcoGray = L.tileLayer(
   "https://tiles.arcgis.com/tiles/C8EMgrsFcRFL6LrL/arcgis/rest/services/GEBCO_grayscale_basemap_NCEI/MapServer/tile/{z}/{y}/{x}",
   {
@@ -51,9 +48,9 @@ let gpxLoadedCount = 0;
 const totalGpx = gpxFiles.length;
 
 // ===============================
-// 5) Variables position actuelle
+// 5) Position actuelle
 // ===============================
-let lastGpxEndLatLng = null;
+let lastPositionLatLng = null;
 let currentPositionMarker = null;
 
 // ===============================
@@ -76,20 +73,14 @@ function addGpx(path, color, name) {
     .on("loaded", function (e) {
       const gpx = e.target;
 
-      // Ajouter la trace au groupe
       tracesGroup.addLayer(gpx);
 
-      // 🔹 Récupérer le dernier point de la trace
-      gpx.getLayers().forEach(layer => {
-        if (layer instanceof L.Polyline) {
-          const latlngs = layer.getLatLngs();
-          if (latlngs.length > 0) {
-            lastGpxEndLatLng = latlngs[latlngs.length - 1];
-          }
-        }
-      });
+      // ✅ POSITION DE FIN (méthode fiable)
+      const endLatLng = gpx.get_end_location();
+      if (endLatLng) {
+        lastPositionLatLng = endLatLng;
+      }
 
-      // Compteur de chargement
       gpxLoadedCount++;
 
       // Quand tous les GPX sont chargés
@@ -99,13 +90,9 @@ function addGpx(path, color, name) {
           padding: [40, 40]
         });
 
-        // 🔵 Placer le point bleu (position actuelle)
-        if (lastGpxEndLatLng) {
-          if (currentPositionMarker) {
-            map.removeLayer(currentPositionMarker);
-          }
-
-          currentPositionMarker = L.circleMarker(lastGpxEndLatLng, {
+        // 🔵 Point bleu position actuelle
+        if (lastPositionLatLng) {
+          currentPositionMarker = L.circleMarker(lastPositionLatLng, {
             radius: 6,
             color: "#1e90ff",
             fillColor: "#1e90ff",
@@ -114,24 +101,17 @@ function addGpx(path, color, name) {
         }
       }
 
-      // Infos popup
+      // Popup
       const distanceKm = (gpx.get_distance() / 1000).toFixed(1);
 
       const start = gpx.get_start_time();
       const end = gpx.get_end_time();
 
-      const startStr = start
-        ? start.toLocaleDateString("fr-CH")
-        : "date inconnue";
-      const endStr = end
-        ? end.toLocaleDateString("fr-CH")
-        : "date inconnue";
-
       const html = `
         <strong>${name}</strong><br>
         Distance : ${distanceKm} km<br>
-        Du : ${startStr}<br>
-        Au : ${endStr}
+        Du : ${start ? start.toLocaleDateString("fr-CH") : "?"}<br>
+        Au : ${end ? end.toLocaleDateString("fr-CH") : "?"}
       `;
 
       gpx.bindPopup(html);
@@ -142,16 +122,12 @@ function addGpx(path, color, name) {
 }
 
 // ===============================
-// 7) Chargement des GPX
+// 7) Charger les GPX
 // ===============================
 const BLUE = "#7593c7";
 
 gpxFiles.forEach((file, index) => {
-  addGpx(
-    "data/" + file,
-    BLUE,
-    "Trace " + (index + 1)
-  );
+  addGpx("data/" + file, BLUE, "Trace " + (index + 1));
 });
 
 // ===============================
