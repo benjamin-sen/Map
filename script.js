@@ -51,7 +51,13 @@ let gpxLoadedCount = 0;
 const totalGpx = gpxFiles.length;
 
 // ===============================
-// 5) Fonction d’ajout GPX
+// 5) Variables position actuelle
+// ===============================
+let lastGpxEndLatLng = null;
+let currentPositionMarker = null;
+
+// ===============================
+// 6) Fonction d’ajout GPX
 // ===============================
 function addGpx(path, color, name) {
   const gpxLayer = new L.GPX(path, {
@@ -73,14 +79,39 @@ function addGpx(path, color, name) {
       // Ajouter la trace au groupe
       tracesGroup.addLayer(gpx);
 
+      // 🔹 Récupérer le dernier point de la trace
+      gpx.getLayers().forEach(layer => {
+        if (layer instanceof L.Polyline) {
+          const latlngs = layer.getLatLngs();
+          if (latlngs.length > 0) {
+            lastGpxEndLatLng = latlngs[latlngs.length - 1];
+          }
+        }
+      });
+
       // Compteur de chargement
       gpxLoadedCount++;
 
-      // Zoom global quand TOUS les GPX sont chargés
+      // Quand tous les GPX sont chargés
       if (gpxLoadedCount === totalGpx) {
+        // Zoom global
         map.fitBounds(tracesGroup.getBounds(), {
           padding: [40, 40]
         });
+
+        // 🔵 Placer le point bleu (position actuelle)
+        if (lastGpxEndLatLng) {
+          if (currentPositionMarker) {
+            map.removeLayer(currentPositionMarker);
+          }
+
+          currentPositionMarker = L.circleMarker(lastGpxEndLatLng, {
+            radius: 6,
+            color: "#1e90ff",
+            fillColor: "#1e90ff",
+            fillOpacity: 1
+          }).addTo(map);
+        }
       }
 
       // Infos popup
@@ -111,7 +142,7 @@ function addGpx(path, color, name) {
 }
 
 // ===============================
-// 6) Chargement des GPX
+// 7) Chargement des GPX
 // ===============================
 const BLUE = "#7593c7";
 
@@ -124,7 +155,7 @@ gpxFiles.forEach((file, index) => {
 });
 
 // ===============================
-// 7) Contrôle des couches
+// 8) Contrôle des couches
 // ===============================
 const baseLayers = {
   "Fond clair (Carto)": cartoLight,
